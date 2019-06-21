@@ -10,7 +10,8 @@ pygame.display.set_caption("Pong")
 white = (255, 255, 255)
 black = (0,0,0)
 directory = os.getcwd()
-
+pad_sound = directory + "/sounds/ping_pong_8bit_plop.ogg"
+point_sound = directory + "/sounds/ping_pong_8bit_beeep.ogg"
 
 class Pad(pygame.sprite.Sprite):
 	
@@ -54,6 +55,8 @@ class Ball(pygame.sprite.Sprite):
 	def update(self):
 		
 		if (self.rect.y >= 600 or self.rect.y <= 0):
+			pygame.mixer.music.load(pad_sound)
+			pygame.mixer.music.play()
 			self.direction_y *= -1
 			
 		self.rect.y += self.direction_y * self.speed
@@ -70,8 +73,7 @@ class Pong():
 		self.player2 = pygame.sprite.GroupSingle(Pad(780, pygame.K_w, pygame.K_s))
 		self.ball = pygame.sprite.GroupSingle(Ball( choice([2,-2]) ))
 		self.clock = pygame.time.Clock()
-		self.pad_sound = directory + "/sounds/ping_pong_8bit_plop.ogg"
-		self.point_sound = directory + "/sounds/ping_pong_8bit_beeep.ogg"
+		
 
 	def update(self):
 		self.screen.fill(black)
@@ -90,22 +92,21 @@ class Pong():
 		 pygame.sprite.groupcollide(self.player2, self.ball, False, False):
 			for b in self.ball: 
 				b.direction_x *= -1
-				pygame.mixer.music.load(self.point_sound)
+				pygame.mixer.music.load(pad_sound)
 				pygame.mixer.music.play()
 		
-	
 	def check_point(self):
 	
 		ball = self.ball.sprites()[0]
 		if ball.rect.x <= 8:
-			pygame.mixer.music.load(self.pad_sound)
+			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
 			self.player2.sprites()[0].points += 1
 			self.ball.remove()
 			self.ball.add(Ball(2))
 
 		if ball.rect.x >= 785:
-			pygame.mixer.music.load(self.pad_sound)
+			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
 			self.player1.sprites()[0].points += 1
 			self.ball.remove()
