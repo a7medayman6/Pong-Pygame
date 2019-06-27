@@ -69,9 +69,9 @@ class Pong():
 	
 	def __init__(self):
 		self.screen = pygame.display.set_mode((800, 600))
-		self.player1 = pygame.sprite.GroupSingle(Player(10, pygame.K_UP, pygame.K_DOWN))
-		self.player2 = pygame.sprite.GroupSingle(Player(780, pygame.K_w, pygame.K_s))
-		self.ball = pygame.sprite.GroupSingle(Ball( choice([1,-1]) ))
+		self.player1 = Player(10, pygame.K_UP, pygame.K_DOWN)
+		self.player2 = Player(780, pygame.K_w, pygame.K_s)
+		self.ball = Ball(choice([1,-1]))
 		self.clock = pygame.time.Clock()
 		
 
@@ -88,35 +88,32 @@ class Pong():
 	
 	def check_colisions(self):
 		
-		if pygame.sprite.groupcollide(self.player1, self.ball, False, False) or\
-		   pygame.sprite.groupcollide(self.player2, self.ball, False, False):
-			
-				b = self.ball.sprites()[0]
-				b.direction_x *= -1
-				b.speed += 0.5
+		if pygame.sprite.collide_rect(self.player1, self.ball) or\
+		   pygame.sprite.collide_rect(self.player2, self.ball):
+
+				self.ball.direction_x *= -1
+				self.ball.speed += 0.5
 				pygame.mixer.music.load(collision_sound)
 				pygame.mixer.music.play()
 		
 	def check_point(self):
 	
-		ball = self.ball.sprites()[0]
-		if ball.rect.x <= 8:
+		
+		if self.ball.rect.x <= 8:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
-			self.player2.sprites()[0].points += 1
-			self.ball.remove()
-			self.ball.add(Ball(1))
+			self.player2.points += 1
+			self.ball = Ball(1)
 
-		if ball.rect.x >= 785:
+		if self.ball.rect.x >= 785:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
-			self.player1.sprites()[0].points += 1
-			self.ball.remove()
-			self.ball.add(Ball(-1))
+			self.player1.points += 1
+			self.ball = Ball(-1)
 			
 	def show_points(self):
-		p1_points = str(self.player1.sprites()[0].points)
-		p2_points = str(self.player2.sprites()[0].points)
+		p1_points = str(self.player1.points)
+		p2_points = str(self.player2.points)
 		
 		font = pygame.font.Font(directory + '/font/AtariSmall.ttf', 80)		
 		text1 = font.render(p1_points, True, white)
