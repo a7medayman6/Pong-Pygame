@@ -19,7 +19,7 @@ TODO
 ```
 
 If you have Python and Pygame installed, you can run the program in the command prompt / terminal.
-> python game.py
+> python pong.py
 
 
 ## Controls
