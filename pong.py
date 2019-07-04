@@ -17,9 +17,10 @@ class Player(pygame.sprite.Sprite):
 	
 	def __init__(self, x, key_up, key_down):
 		pygame.sprite.Sprite.__init__(self)
-		self.surface = pygame.Surface( [10,80] )
-		self.surface.fill(white)
-		self.rect = self.surface.get_rect()
+		self.image = pygame.Surface( [10,80] )
+		self.image.fill(white)
+		self.mask = pygame.mask.from_surface(self.image)
+		self.rect = self.image.get_rect()
 		self.rect.x = x
 		self.rect.y = 260
 		self.points = 0
@@ -36,16 +37,17 @@ class Player(pygame.sprite.Sprite):
 			if self.rect.top > 0:
 				self.rect.y -= 5
 		
-		game.screen.blit(self.surface, (self.rect.x, self.rect.y))
+		game.screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 class Ball(pygame.sprite.Sprite):
 	
 	def __init__(self, direction, speed=2):
 		pygame.sprite.Sprite.__init__(self)
-		self.surface = pygame.Surface([12,12])
-		self.surface.fill(white)
-		self.rect = self.surface.get_rect()
+		self.image = pygame.Surface([12,12])
+		self.image.fill(white)
+		self.mask = pygame.mask.from_surface(self.image)
+		self.rect = self.image.get_rect()
 		self.rect.x = 400
 		self.rect.y = choice([10,590])
 		self.direction_x = direction
@@ -62,16 +64,16 @@ class Ball(pygame.sprite.Sprite):
 		self.rect.y += self.direction_y * self.speed
 		self.rect.x += self.direction_x * self.speed
 		
-		game.screen.blit(self.surface, (self.rect.x, self.rect.y))
+		game.screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 class Pong():
 	
 	def __init__(self):
 		self.screen = pygame.display.set_mode((800, 600))
-		self.player1 = pygame.sprite.GroupSingle(Player(10, pygame.K_UP, pygame.K_DOWN))
-		self.player2 = pygame.sprite.GroupSingle(Player(780, pygame.K_w, pygame.K_s))
-		self.ball = pygame.sprite.GroupSingle(Ball( choice([1,-1]) ))
+		self.player1 = Player(10, pygame.K_UP, pygame.K_DOWN)
+		self.player2 = Player(780, pygame.K_w, pygame.K_s)
+		self.ball = Ball(choice([1,-1]))
 		self.clock = pygame.time.Clock()
 		
 
@@ -88,35 +90,30 @@ class Pong():
 	
 	def check_colisions(self):
 		
-		if pygame.sprite.groupcollide(self.player1, self.ball, False, False) or\
-		   pygame.sprite.groupcollide(self.player2, self.ball, False, False):
-			
-				b = self.ball.sprites()[0]
-				b.direction_x *= -1
-				b.speed += 0.5
+		if pygame.sprite.collide_rect(self.player1, self.ball) or\
+		   pygame.sprite.collide_rect(self.ball, self.player2):
 				pygame.mixer.music.load(collision_sound)
 				pygame.mixer.music.play()
-		
+				self.ball.direction_x *= -1
+				self.ball.speed += 0.5
+
 	def check_point(self):
 	
-		ball = self.ball.sprites()[0]
-		if ball.rect.x <= 8:
+		if self.ball.rect.left < 0:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
-			self.player2.sprites()[0].points += 1
-			self.ball.remove()
-			self.ball.add(Ball(1))
+			self.player2.points += 1
+			self.ball = Ball(1)
 
-		if ball.rect.x >= 785:
+		if self.ball.rect.right > 790:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
-			self.player1.sprites()[0].points += 1
-			self.ball.remove()
-			self.ball.add(Ball(-1))
-			
+			self.player1.points += 1
+			self.ball = Ball(-1)
+		
 	def show_points(self):
-		p1_points = str(self.player1.sprites()[0].points)
-		p2_points = str(self.player2.sprites()[0].points)
+		p1_points = str(self.player1.points)
+		p2_points = str(self.player2.points)
 		
 		font = pygame.font.Font(directory + '/font/AtariSmall.ttf', 80)		
 		text1 = font.render(p1_points, True, white)
@@ -130,6 +127,7 @@ class Pong():
 	def main(self):
 		run = True
 		while run:
+					
 			for event in pygame.event.get():
 				
 				if event.type == pygame.QUIT:
@@ -137,8 +135,51 @@ class Pong():
 			
 			self.update()
 			self.clock.tick(120)
-
+	
+	def start(self):
+		group = pygame.sprite.Group()
+		group.add(Ball(-1))
+		group.add(Ball(1))
+		
+		running = True
+		font = pygame.font.Font(directory + '/font/AtariSmall.ttf', 110)		
+		title = font.render("Pong", True, white)
+		title_rect = title.get_rect( center=(400, 200))
+		
+		font = pygame.font.Font(directory + '/font/AtariSmall.ttf', 20)		
+		subtitle = font.render("Press SPACE to start", True, white)
+		subtitle_rect = subtitle.get_rect( center=(400, 300))
+		
+		while running:
+			self.screen.fill(black)
+			self.screen.blit(title, title_rect)
+			self.screen.blit(subtitle, subtitle_rect)
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					running = False
+					
+			if pygame.key.get_pressed()[pygame.K_SPACE]:
+				break
+				
+			for b in group:
+				if (b.rect.x <= 0 or b.rect.x >= 800):
+					b.direction_x *= -1
+					
+				if (b.rect.y >= 600 or b.rect.y <= 0):
+					b.direction_y *= -1
+			
+				b.rect.y += b.direction_y * b.speed
+				b.rect.x += b.direction_x * b.speed
+				self.screen.blit(b.image, b.rect)
+				
+			pygame.display.update()
+		
+		if running:
+			self.main()
+		else:
+			pygame.quit()
+		
 if __name__ == '__main__':
 	game = Pong()
-	game.main()
+	game.start()
 
