@@ -91,7 +91,8 @@ class Pong():
 	def check_colisions(self):
 		
 		if pygame.sprite.collide_rect(self.player1, self.ball) or\
-		   pygame.sprite.collide_rect(self.ball, self.player2):
+		   pygame.sprite.collide_rect(self.player2, self.ball):
+
 				pygame.mixer.music.load(collision_sound)
 				pygame.mixer.music.play()
 				self.ball.direction_x *= -1
@@ -99,7 +100,7 @@ class Pong():
 
 	def check_point(self):
 	
-		if self.ball.rect.left < 0:
+		if self.ball.rect.left < 10:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
 			self.player2.points += 1
