@@ -19,7 +19,6 @@ class Player(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.Surface( [10,80] )
 		self.image.fill(white)
-		self.mask = pygame.mask.from_surface(self.image)
 		self.rect = self.image.get_rect()
 		self.rect.x = x
 		self.rect.y = 260
@@ -46,7 +45,6 @@ class Ball(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.Surface([12,12])
 		self.image.fill(white)
-		self.mask = pygame.mask.from_surface(self.image)
 		self.rect = self.image.get_rect()
 		self.rect.x = 400
 		self.rect.y = choice([10,590])
@@ -71,8 +69,8 @@ class Pong():
 	
 	def __init__(self):
 		self.screen = pygame.display.set_mode((800, 600))
-		self.player1 = Player(10, pygame.K_UP, pygame.K_DOWN)
-		self.player2 = Player(780, pygame.K_w, pygame.K_s)
+		self.player1 = Player(10, pygame.K_w, pygame.K_s)
+		self.player2 = Player(780, pygame.K_UP, pygame.K_DOWN)
 		self.ball = Ball(choice([1,-1]))
 		self.clock = pygame.time.Clock()
 		
@@ -100,13 +98,13 @@ class Pong():
 
 	def check_point(self):
 	
-		if self.ball.rect.left < 10:
+		if self.ball.rect.left < self.player1.rect.left:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
 			self.player2.points += 1
 			self.ball = Ball(1)
 
-		if self.ball.rect.right > 790:
+		if self.ball.rect.right > self.player2.rect.right:
 			pygame.mixer.music.load(point_sound)
 			pygame.mixer.music.play()
 			self.player1.points += 1
