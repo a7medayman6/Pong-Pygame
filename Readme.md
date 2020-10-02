@@ -15,7 +15,9 @@ Linux:
     To see if it works, run one of the included examples:
     ```
     python3 -m pygame.examples.aliens
+
     ```
+
 Windows:
 ```
 TODO
