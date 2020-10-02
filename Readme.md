@@ -9,10 +9,13 @@
 You must have Python and Pygame installed. If you don't have you can install with the following commands:
 
 Linux:
-```
-TODO
-```
-
+    ```
+    python3 -m pip install -U pygame --user
+    ```
+    To see if it works, run one of the included examples:
+    ```
+    python3 -m pygame.examples.aliens
+    ```
 Windows:
 ```
 TODO
